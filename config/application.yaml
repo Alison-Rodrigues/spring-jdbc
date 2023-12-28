@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: JDBC TEST
+  main:
+    banner-mode: OFF
+
+  datasource:
+    url: jdbc:postgresql://postgres-local:5432/jdbc_test?currentSchema=jdbc_data
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+server:
+  port: 8081
