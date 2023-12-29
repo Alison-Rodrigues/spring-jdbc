@@ -2,47 +2,49 @@ package com.estudo.jdbc.repository;
 
 import com.estudo.jdbc.dto.UserDto;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-@AllArgsConstructor
 @Repository
+@AllArgsConstructor
+@Slf4j
 public class UserControlRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public void save(UserDto userDto) {
+    public void save(UserDto userDto) throws SQLException {
 
         String sql = "INSERT INTO jdbc_data.user (first_name, last_name) VALUES (?,?)";
 
-        int rows = jdbcTemplate.update(sql, userDto.getFirstName(), userDto.getLastName());
+        int rows = jdbcTemplate.update(sql,
+                userDto.getFirstName(),
+                userDto.getLastName()
+        );
 
-        System.out.println(rows + "linha(s) afetada(s)");
+        log.info(String.format("%s row(s) affected.", rows));
+
     }
 
-    public List<UserDto> findAll() {
-
+    public List<UserDto> findAll() throws SQLException{
         String sql = "SELECT * FROM jdbc_data.user";
 
-        RowMapper<UserDto> mapper = new RowMapper<UserDto>() {
-            @Override
-            public UserDto mapRow(ResultSet rs, int rowNum) throws SQLException {
-                UserDto userDto = new UserDto();
+        return jdbcTemplate.query(sql,
+                (rs, i) -> new UserDto(
+                        rs.getInt("id"),
+                        rs.getString("first_name"),
+                        rs.getString("last_name")
+                ));
+    }
 
-                userDto.setFirstName(rs.getString("first_name"));
-                userDto.setLastName(rs.getString("last_name"));
+    public void delete(Integer id) throws SQLException{
+        String sql = "DELETE FROM jdbc_data.user WHERE id = ?";
 
-                return userDto;
-            }
-        };
+        int rows = jdbcTemplate.update(sql, id);
 
-        List<UserDto> userDtoList = jdbcTemplate.query(sql, mapper);
-
-        return userDtoList;
+        log.info(String.format("%s row(s) deleted.", rows));
     }
 }
